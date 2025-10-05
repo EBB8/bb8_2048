@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2048</title>
+    <title>BB8 NEO 2048</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
             margin: 0;
@@ -18,10 +19,14 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            font-family: 'Arial', sans-serif;
+            background: #000000;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 65, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 255, 255, 0.05) 0%, transparent 50%);
+            font-family: 'Courier New', monospace;
             padding: 20px;
             touch-action: manipulation;
+            color: #00ff41;
         }
         
         .container {
@@ -36,10 +41,43 @@
             margin-bottom: 20px;
         }
         
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 255, 65, 0.1);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff41, #00ffff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+        }
+        
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00ff41;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
+        }
+        
         h1 {
             font-size: 48px;
-            color: #776e65;
+            color: #00ff41;
             font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.8), 0 0 40px rgba(0, 255, 65, 0.4);
+            letter-spacing: 3px;
         }
         
         .score-container {
@@ -48,61 +86,75 @@
         }
         
         .score-box {
-            background: #bbada0;
+            background: rgba(0, 0, 0, 0.8);
             padding: 15px 20px;
             border-radius: 10px;
             text-align: center;
-            color: white;
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
         }
         
         .score-label {
             font-size: 12px;
             text-transform: uppercase;
             margin-bottom: 5px;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+            letter-spacing: 2px;
         }
         
         .score-value {
             font-size: 24px;
             font-weight: bold;
+            color: #00ff41;
+            text-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
         }
         
         .game-info {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 255, 65, 0.05);
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid rgba(0, 255, 65, 0.2);
         }
         
         .instructions {
             font-size: 14px;
-            color: #776e65;
+            color: #00ff41;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
         }
         
         .new-game-btn {
             padding: 12px 24px;
-            background: #8f7a66;
-            color: white;
+            background: linear-gradient(135deg, #00ff41, #00ffff);
+            color: #000;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .new-game-btn:active {
             transform: scale(0.95);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.8);
         }
         
         .game-board {
-            background: #bbada0;
+            background: rgba(0, 0, 0, 0.9);
             border-radius: 15px;
             padding: 15px;
             position: relative;
             touch-action: none;
+            border: 2px solid rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.2), inset 0 0 20px rgba(0, 255, 65, 0.05);
         }
         
         .grid {
@@ -171,6 +223,18 @@
             margin-bottom: 20px;
         }
         
+        .share-btn {
+            margin-top: 10px;
+            padding: 12px 24px;
+            background: var(--tg-theme-button-color, #5288c1);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
         @media (max-width: 480px) {
             h1 { font-size: 36px; }
             .tile { font-size: 24px; }
@@ -182,7 +246,14 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>2048</h1>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">?</div>
+                <div class="user-name" id="userName">플레이어</div>
+            </div>
+        </div>
+        
+        <div class="header">
+            <h1>NEO 2048</h1>
             <div class="score-container">
                 <div class="score-box">
                     <div class="score-label">점수</div>
@@ -208,18 +279,40 @@
             
             <div class="game-over" id="gameOver">
                 <h2>게임 오버!</h2>
+                <div style="font-size: 20px; margin: 10px 0;">점수: <span id="finalScore">0</span></div>
                 <button class="new-game-btn" onclick="initGame()">다시 시작</button>
+                <button class="share-btn" onclick="shareScore()">친구에게 공유하기</button>
             </div>
             
             <div class="game-won" id="gameWon">
-                <h2>성공!</h2>
+                <h2>🎉 성공!</h2>
+                <div style="font-size: 20px; margin: 10px 0;">점수: <span id="winScore">0</span></div>
                 <button class="new-game-btn" onclick="continueGame()">계속하기</button>
                 <button class="new-game-btn" onclick="initGame()" style="margin-top: 10px;">새 게임</button>
+                <button class="share-btn" onclick="shareWin()">승리 공유하기</button>
             </div>
         </div>
     </div>
 
     <script>
+        // 텔레그램 웹앱 초기화
+        let tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        
+        // 사용자 정보 표시
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('userName').textContent = user.first_name || '플레이어';
+            const initial = (user.first_name || 'P')[0].toUpperCase();
+            document.getElementById('userAvatar').textContent = initial;
+        }
+        
+        // 텔레그램 테마 색상 적용
+        if (tg.themeParams) {
+            document.body.style.background = tg.themeParams.bg_color || '#ffecd2';
+        }
+        
         const GRID_SIZE = 4;
         let board = [];
         let score = 0;
@@ -227,8 +320,20 @@
         let hasWon = false;
         let canContinue = true;
         
-        // 로컬 스토리지 대신 변수 사용
-        let savedBestScore = 0;
+        // 클라우드 스토리지에서 최고 점수 불러오기
+        function loadBestScore() {
+            tg.CloudStorage.getItem('bestScore', (error, value) => {
+                if (!error && value) {
+                    bestScore = parseInt(value) || 0;
+                    document.getElementById('best').textContent = bestScore;
+                }
+            });
+        }
+        
+        // 최고 점수 저장
+        function saveBestScore() {
+            tg.CloudStorage.setItem('bestScore', bestScore.toString());
+        }
         
         function initGame() {
             board = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
@@ -242,6 +347,9 @@
             addNewTile();
             addNewTile();
             renderBoard();
+            
+            // 햅틱 피드백
+            tg.HapticFeedback.impactOccurred('medium');
         }
         
         function addNewTile() {
@@ -265,7 +373,7 @@
             tilesContainer.innerHTML = '';
             
             const boardElement = document.getElementById('gameBoard');
-            const cellSize = (boardElement.clientWidth - 75) / 4; // 15px gap * 5
+            const cellSize = (boardElement.clientWidth - 75) / 4;
             
             for (let i = 0; i < GRID_SIZE; i++) {
                 for (let j = 0; j < GRID_SIZE; j++) {
@@ -297,6 +405,7 @@
                         if (j < row.length - 1 && row[j] === row[j + 1]) {
                             merged.push(row[j] * 2);
                             score += row[j] * 2;
+                            tg.HapticFeedback.impactOccurred('light');
                             if (row[j] * 2 === 2048 && !hasWon) {
                                 hasWon = true;
                                 setTimeout(() => showWin(), 200);
@@ -327,6 +436,7 @@
                         if (i < col.length - 1 && col[i] === col[i + 1]) {
                             merged.push(col[i] * 2);
                             score += col[i] * 2;
+                            tg.HapticFeedback.impactOccurred('light');
                             if (col[i] * 2 === 2048 && !hasWon) {
                                 hasWon = true;
                                 setTimeout(() => showWin(), 200);
@@ -360,6 +470,8 @@
                 if (isGameOver()) {
                     setTimeout(() => {
                         document.getElementById('gameOver').classList.add('show');
+                        document.getElementById('finalScore').textContent = score;
+                        tg.HapticFeedback.notificationOccurred('error');
                     }, 200);
                 }
             }
@@ -379,6 +491,8 @@
         function showWin() {
             if (canContinue) {
                 document.getElementById('gameWon').classList.add('show');
+                document.getElementById('winScore').textContent = score;
+                tg.HapticFeedback.notificationOccurred('success');
             }
         }
         
@@ -389,10 +503,23 @@
         
         function updateScore() {
             document.getElementById('score').textContent = score;
-            if (score > savedBestScore) {
-                savedBestScore = score;
-                document.getElementById('best').textContent = savedBestScore;
+            if (score > bestScore) {
+                bestScore = score;
+                document.getElementById('best').textContent = bestScore;
+                saveBestScore();
             }
+        }
+        
+        function shareScore() {
+            const text = `나는 2048 게임에서 ${score}점을 달성했어요! 당신도 도전해보세요!`;
+            const url = 'https://t.me/share/url?url=' + encodeURIComponent(tg.initDataUnsafe.start_param || '') + '&text=' + encodeURIComponent(text);
+            tg.openTelegramLink(url);
+        }
+        
+        function shareWin() {
+            const text = `🎉 나는 2048 게임을 정복했어! 점수: ${score}점! 당신도 도전해보세요!`;
+            const url = 'https://t.me/share/url?url=' + encodeURIComponent(tg.initDataUnsafe.start_param || '') + '&text=' + encodeURIComponent(text);
+            tg.openTelegramLink(url);
         }
         
         // 키보드 이벤트
@@ -466,7 +593,7 @@
         window.addEventListener('resize', renderBoard);
         
         // 게임 초기화
-        document.getElementById('best').textContent = savedBestScore;
+        loadBestScore();
         initGame();
     </script>
 </body>
